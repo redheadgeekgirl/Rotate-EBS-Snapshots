@@ -30,8 +30,6 @@ LAST_DAILY = Time.at( LAST_HOURLY - ( NUM_DAILIES * 24 * 60 * 60 ) ).strftime( D
 LAST_WEEKLY = Time.at( LAST_HOURLY - ( NUM_DAILIES * 24 * 60 * 60 ) - ( NUM_WEEKLIES * 7 * 24 * 60 * 60 ) ).strftime( WEEK_FORMAT ).to_i
 
 snapshots_by_volume = {}
-days_kept = []
-weeks_kept = []
 
 # Grab all the snapshots for this account and order them by volume
 current_snapshots['snapshotSet']['item'].each do |snap|
@@ -53,6 +51,10 @@ volumes = VOLUME_ID.nil? ? snapshots_by_volume.keys : ( VOLUME_ID.is_a?( Array )
 volumes.each do |v|
   next unless snapshots_by_volume.has_key? v #skip if this volume doesn't have any snapshots
   
+  # These arrays need to be inside the block of code that iterates through volume IDs otherwise bad things happen!
+  days_kept = []
+  weeks_kept = []
+
   snapshots_by_volume[v].sort! { |x,y| y[:timestamp] <=> x[:timestamp] } #sort this volume's snapshots by newest to oldest
   snapshots_by_volume[v].each do |snap|
     # This snapshot is within the accepted hourly range and will be kept
